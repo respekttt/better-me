@@ -1,3 +1,31 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+	--color-primary: #FF4040;
+	--color-brand-beige: #F3EDE4;
+	--color-brand-dark: #2D2926;
+	--color-card-white: #F9F6F1;
+
+	--font-display: "Inter", "sans-serif";
+	--font-mono: "Roboto Mono", "monospace";
+
+	--radius-better: 24px;
+	--radius-better-sm: 12px;
+}
+
+@layer base {
+	*, ::before, ::after {
+		margin: 0;
+		padding: 0;
+		box-sizing: border-box;
+	}
+
+	body {
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+	}
+}
+
+@layer .dark-tag {
+	@apply bg-brand-dark text-white px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider inline-flex items-center justify-center;
+}
