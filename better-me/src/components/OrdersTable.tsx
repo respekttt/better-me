@@ -1,34 +1,36 @@
 import type { Order } from "../types";
 
 interface OrdersTableProps{
-    orders: Order[]
+    orders: Order[];
+    onInfoClick: (order: Order) => void;
 }
 
 
-export function OrdersTable({orders}: OrdersTableProps) {
+export function OrdersTable({orders, onInfoClick}: OrdersTableProps) {
     return (
-        <div className="bg-white rounded-b-4xl rounded-tl-4xl shadow-sm overflow-hidden border border-[#E5E1D8]">
-            <table className="w-full text-left">
+        <div className="overflow-hidden rounded-b-3xl rounded-tl-3xl border border-[#E5E1D8] bg-white shadow-sm sm:rounded-b-4xl sm:rounded-tl-4xl">
+            <div className="overflow-x-auto">
+            <table className="min-w-[980px] w-full text-left">
                 <thead
                     className="bg-[#2D2823] text-[#A39E98] text-[10px] uppercase tracking-widest font-bold">
                     <tr>
-                        <th className="px-8 py-5">Order ID & Time</th>
-                        <th className="px-8 py-5">Location</th>
-                        <th className="px-8 py-5">Subtotal</th>
-                        <th className="px-8 py-5">Tax Rate</th>
-                        <th className="px-8 py-5">Tax Amount</th>
-                        <th className="px-8 py-5">Total</th>
-                        <th className="px-8 py-5">Info</th>
+                        <th className="px-4 py-4 sm:px-8 sm:py-5">Order ID & Time</th>
+                        <th className="px-4 py-4 sm:px-8 sm:py-5">Location</th>
+                        <th className="px-4 py-4 sm:px-8 sm:py-5">Subtotal</th>
+                        <th className="px-4 py-4 sm:px-8 sm:py-5">Tax Rate</th>
+                        <th className="px-4 py-4 sm:px-8 sm:py-5">Tax Amount</th>
+                        <th className="px-4 py-4 sm:px-8 sm:py-5">Total</th>
+                        <th className="px-4 py-4 sm:px-8 sm:py-5">Info</th>
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-[#F5F2EB]">
                     {orders.map((order) => (
                         <tr key={order.id} className={`${order.status === 'processing' ? 'bg-[#FFF5F5]' : ''} hover:bg-gray-50 transition-colors`}>
-                            <td className="px-8 py-5">
+                            <td className="px-4 py-4 sm:px-8 sm:py-5">
                                 <div className="font-bold text-black">{order.id}</div>
                                 <div className="text-[10px] text-[#A39E98] font-bold uppercase">{order.timestamp}</div>
                             </td>
-                            <td className="px-8 py-5 text-[12px] font-bold text-[#A39E98]">
+                            <td className="px-4 py-4 text-[12px] font-bold text-[#A39E98] sm:px-8 sm:py-5">
                                 {order.status === 'processing' ? (
                                     <span
                                         className="text-[#FF4D4D] animate-pulse flex gap-1">
@@ -57,8 +59,8 @@ export function OrdersTable({orders}: OrdersTableProps) {
                                         {order.latitude}, {order.longitude}</span>
                                 )}
                             </td>
-                            <td className="px-8 py-5 font-black text-black text-lg">${order.subtotal.toFixed(2)}</td>
-                            <td className="px-8 py-5">
+                            <td className="px-4 py-4 text-base font-black text-black sm:px-8 sm:py-5 sm:text-lg">${order.subtotal.toFixed(2)}</td>
+                            <td className="px-4 py-4 sm:px-8 sm:py-5">
                                 {order.status === 'processing' ? (
                                     <span
                                         className="bg-[#FF4D4D] text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase">Processing</span>
@@ -68,16 +70,17 @@ export function OrdersTable({orders}: OrdersTableProps) {
                                     </span>
                                 )}
                             </td>
-                            <td className="px-8 py-5 text-[#A39E98] font-bold">
+                            <td className="px-4 py-4 font-bold text-[#A39E98] sm:px-8 sm:py-5">
                                 {order.status === 'processing' ? '--' : `$${order.tax_amount.toFixed(2)}`}
                             </td>
-                            <td className="px-8 py-5 font-black text-lg">
+                            <td className="px-4 py-4 text-base font-black sm:px-8 sm:py-5 sm:text-lg">
                                 <span className={order.status === 'processing' ? 'text-[#A39E98]' : 'text-[#FF4D4D]'}>
                                     ${order.total_amount.toFixed(2)}{order.status === 'processing' && '*'}
                                 </span>
                             </td>
-                            <td className="px-8 py-5">
+                            <td className="px-4 py-4 sm:px-8 sm:py-5">
                                 <button
+                                    onClick={() => onInfoClick(order)}
                                     className="text-[#A39E98] hover:text-black transition-colors hover:cursor-pointer">
                                     <svg xmlns="http://www.w3.org/2000/svg"
                                         viewBox="0 0 24 24" fill="currentColor"
@@ -92,9 +95,10 @@ export function OrdersTable({orders}: OrdersTableProps) {
                     ))}
                 </tbody>
             </table>
+            </div>
 
             <div
-                className="p-6 border-t border-[#F5F2EB] flex justify-between items-center text-[#A39E98] font-bold text-[11px] uppercase tracking-widest">
+                className="flex flex-col gap-3 border-t border-[#F5F2EB] p-4 text-[11px] font-bold uppercase tracking-widest text-[#A39E98] sm:flex-row sm:items-center sm:justify-between sm:p-6">
                 <div>Displaying 1-5 of 12,450 units</div>
                 <div className="flex gap-2">
                     <button
