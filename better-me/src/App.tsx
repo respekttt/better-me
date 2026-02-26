@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import {type Order} from './types';
 import {Header} from './components/Header';
 import {DashboardStats} from './components/DashboardStats';
@@ -8,28 +8,37 @@ import {ImportCSV} from './components/ImportCSV';
 import {TaxBreakdownDetailsPage} from './components/TaxBreakdownDetailsPage';
 import {ImportCsvProcessingPage} from './components/ImportCsvProcessingPage';
 
-const fakeOrders: Order[] =[
-    {
-        id: '#ORD-9921',
-        timestamp: '10:45 AM TODAY',
-        latitude: 40.7128,
-        longitude: -74.0060,
-        subtotal: 120.00,
-        composite_tax_rate: 0.08875,
-        tax_amount: 10.65,
-        total_amount: 130.65,
-        status: 'completed',
-        breakdown: { state_rate: 0.04, county_rate: 0.0475, city_rate: 0, special_rates: 0.00125 },
-        jurisdictions: ["New York State", "New York City"]
-    }
-];
+// const fakeOrders: Order[] =[
+//     {
+//         id: '#ORD-9921',
+//         timestamp: '10:45 AM TODAY',
+//         latitude: 40.7128,
+//         longitude: -74.0060,
+//         subtotal: 120.00,
+//         composite_tax_rate: 0.08875,
+//         tax_amount: 10.65,
+//         total_amount: 130.65,
+//         status: 'completed',
+//         breakdown: { state_rate: 0.04, county_rate: 0.0475, city_rate: 0, special_rates: 0.00125 },
+//         jurisdictions: ["New York State", "New York City"]
+//     }
+// ];
 
 export default function App() {
-    const [orders, setOrders] = useState<Order[]>(fakeOrders);
+    const [orders, setOrders] = useState<Order[]>(() => {
+        const savedOrders = localStorage.getItem('myList');
+        if(savedOrders){
+            return JSON.parse(savedOrders)
+        } else return []
+    });
     const[isModalOpen, setIsModalOpen] = useState(false);
     const [isImportOpen, setIsImportOpen] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
+    useEffect(() => {
+        localStorage.setItem('myList',JSON.stringify(orders))
+    }, [orders])
+    
     const handleAddOrder = (newOrder: Order) => {
         setOrders([newOrder, ...orders]);
     };
