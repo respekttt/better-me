@@ -1,3 +1,8 @@
+export interface CreateOrderRequest{
+    latitude: number;
+    longitude: number;
+    subtotal: number;
+}
 export interface TaxBreakdown {
     state_rate: number;
     county_rate: number;
@@ -18,3 +23,4 @@ export interface Order {
     breakdown: TaxBreakdown;
     jurisdictions?: string[];
 }
+
