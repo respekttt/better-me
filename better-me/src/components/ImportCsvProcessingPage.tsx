@@ -1,4 +1,4 @@
-import {useRef, useState} from "react";
+import {type DragEvent, useRef, useState} from "react";
 import type {Order} from "../types";
 
 interface ImportCsvProcessingPageProps {
@@ -10,9 +10,32 @@ export function ImportCsvProcessingPage({ onClose, onImportSuccess }: ImportCsvP
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isDragActive, setIsDragActive] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    if (!file) return;
+    setSelectedFile(file);
+  };
+
+  const handleDragOver = (event: DragEvent<HTMLElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDragActive(true);
+  };
+
+  const handleDragLeave = (event: DragEvent<HTMLElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDragActive(false);
+  };
+
+  const handleDrop = (event: DragEvent<HTMLElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDragActive(false);
+
+    const file = event.dataTransfer.files?.[0];
     if (!file) return;
     setSelectedFile(file);
   };
@@ -59,7 +82,12 @@ export function ImportCsvProcessingPage({ onClose, onImportSuccess }: ImportCsvP
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
       <div className="w-full max-w-155 overflow-hidden rounded-[24px] bg-[#F5F2EB] shadow-2xl sm:rounded-[30px]">
         <div className="px-4 pb-4 pt-4 sm:px-6 sm:pb-5 sm:pt-5">
           <div className="flex items-start justify-between gap-3">
@@ -97,7 +125,14 @@ export function ImportCsvProcessingPage({ onClose, onImportSuccess }: ImportCsvP
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="mt-5 block w-full rounded-[24px] border-2 border-dashed border-[#F0B8B8] bg-[#F8F3F4] px-4 py-8 text-center transition-colors hover:bg-[#f3ecee] sm:py-12 hover:cursor-pointer"
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            className={`mt-5 block w-full rounded-[24px] border-2 border-dashed px-4 py-8 text-center transition-colors sm:py-12 hover:cursor-pointer ${
+              isDragActive
+                ? "border-[#FF7B7B] bg-[#FBECEE]"
+                : "border-[#F0B8B8] bg-[#F8F3F4] hover:bg-[#f3ecee]"
+            }`}
           >
             <span className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full border border-[#F1DDDD] bg-[#F6F3F3] sm:size-18">
               <svg viewBox="0 0 24 24" fill="currentColor" className="size-8 text-[#FF4D4D]" aria-hidden="true">
