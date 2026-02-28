@@ -6,4 +6,17 @@ window.ENV = {
 };
 EOF
 
+cat <<EOF > /etc/nginx/conf.d/default.conf
+server {
+    listen ${PORT:-8080};
+    server_name localhost;
+
+    location / {
+        root   /usr/share/nginx/html;
+        index  index.html index.htm;
+        try_files \$uri \$uri/ /index.html;
+    }
+}
+EOF
+
 exec "$@"
