@@ -27,7 +27,7 @@ export function OrdersTable({
     const endItem = Math.min(currentPage * 10, totalItems);
 
     return (
-        <div className="overflow-hidden rounded-b-3xl rounded-tl-3xl border border-[#E5E1D8] bg-white shadow-sm sm:rounded-b-4xl sm:rounded-tl-4xl">
+        <div className="overflow-hidden rounded-b-3xl rounded-t-3xl border border-[#E5E1D8] bg-white shadow-sm sm:rounded-b-4xl sm:rounded-t-4xl">
             <div className="overflow-x-auto relative">
                 {isLoading && (
                     <div className="absolute inset-0 z-10 bg-white/50 backdrop-blur-[1px] flex items-center justify-center">
@@ -38,8 +38,8 @@ export function OrdersTable({
                 <thead
                     className="bg-[#2D2823] text-[#A39E98] text-[10px] uppercase tracking-widest font-bold">
                     <tr>
-                        <th className="px-4 py-4 sm:px-8 sm:py-5">Order ID & Time</th>
-                        <th className="px-4 py-4 sm:px-8 sm:py-5">Location</th>
+                        <th className="pl-4 pr-2 py-4 sm:pl-8 sm:pr-4 sm:py-5">Order ID & Time</th>
+                        <th className="px-1 py-4 sm:py-5">Location</th>
                         <th className="px-4 py-4 sm:px-8 sm:py-5">Subtotal</th>
                         <th className="px-4 py-4 sm:px-8 sm:py-5">Tax Rate</th>
                         <th className="px-4 py-4 sm:px-8 sm:py-5">Tax Amount</th>
@@ -50,14 +50,14 @@ export function OrdersTable({
                 <tbody className="divide-y divide-[#F5F2EB]">
                     {orders.map((order) => (
                         <tr key={order.id} className={`${order.status === 'processing' ? 'bg-[#FFF5F5]' : ''} hover:bg-gray-50 transition-colors`}>
-                            <td className="px-4 py-4 sm:px-8 sm:py-5">
+                            <td className="pl-4 pr-1 py-4 sm:pl-8 sm:pr-2 sm:py-5">
                                 <div className="font-bold text-black">{order.id}</div>
                                 <div className="text-[10px] text-[#A39E98] font-bold uppercase">{order.timestamp}</div>
                             </td>
-                            <td className="px-4 py-4 text-[12px] font-bold text-[#A39E98] sm:px-8 sm:py-5">
+                            <td className="px-1 py-4 text-[12px] font-bold text-[#A39E98] sm:py-5">
                                 {order.status === 'processing' ? (
                                     <span
-                                        className="text-[#FF4D4D] animate-pulse flex gap-1">
+                                        className="text-[#FF4D4D] animate-pulse flex gap-1 w-[220px]">
 
                                         <svg xmlns="http://www.w3.org/2000/svg"
                                             viewBox="0 0 24 24"
@@ -71,16 +71,17 @@ export function OrdersTable({
                                         Locating Unit...
                                     </span>
                                 ) : (
-                                    <span className="inline-flex items-center gap-1 rounded-full bg-[#F3EFE6] px-2.5 py-1 text-[#2D2823]">
+                                    <span className="inline-flex items-center gap-1 rounded-full bg-[#F3EFE6] px-2.5 py-1 text-[#2D2823] w-[220px]">
                                         <svg xmlns="http://www.w3.org/2000/svg"
                                             viewBox="0 0 24 24"
                                             fill="currentColor"
-                                            className="size-4 text-[#FF4D4D]">
+                                            className="size-4 text-[#FF4D4D] shrink-0">
                                             <path fillRule="evenodd"
                                                 d="m11.54 22.351.07.04.028.016a.76.76 0 0 0 .723 0l.028-.015.071-.041a16.975 16.975 0 0 0 1.144-.742 19.58 19.58 0 0 0 2.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 0 0-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 0 0 2.682 2.282 16.975 16.975 0 0 0 1.145.742ZM12 13.5a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"
                                                 clipRule="evenodd" />
                                         </svg>
-                                        {order.latitude}, {order.longitude}</span>
+                                        <span className="truncate">{order.latitude}, {order.longitude}</span>
+                                    </span>
                                 )}
                             </td>
                             <td className="px-4 py-4 text-base font-black text-black sm:px-8 sm:py-5 sm:text-lg">${order.subtotal.toFixed(2)}</td>

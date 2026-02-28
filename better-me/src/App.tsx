@@ -16,6 +16,7 @@ export default function App() {
 
     const [apiOrders, setApiOrders] = useState<Order[]>([]);
     const [pagination, setPagination] = useState<ApiPagination | null>(null);
+    const [globalTotal, setGlobalTotal] = useState<ApiResponse['globalTotal'] | null>(null);
     const [isLoadingOrders, setIsLoadingOrders] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
 
@@ -31,7 +32,6 @@ export default function App() {
     const [filters, setFilters] = useState({ state: '', county: '', city: '', from: '', to: '' });
     const [appliedFilters, setAppliedFilters] = useState({ state: '', county: '', city: '', from: '', to: '' });
 
-    const totalOrdersCount = pagination?.total || 0;
     const [baselineOrdersCount, setBaselineOrdersCount] = useState<number | null>(null);
 
     const fetchOrders = useCallback(async (page: number) => {
@@ -50,11 +50,12 @@ export default function App() {
             const response = await axios.get<ApiResponse>(`https://wellness-tax-api-762050733390.europe-central2.run.app/orders?${params.toString()}`);
             setApiOrders(response.data.orders.map(mapApiOrderToOrder));
             setPagination(response.data.pagination);
+            setGlobalTotal(response.data.globalTotal);
             setCurrentPage(response.data.pagination.page);
             
             const isNoFilters = Object.values(appliedFilters).every(v => !v);
             if (baselineOrdersCount === null && isNoFilters) {
-                setBaselineOrdersCount(response.data.pagination.total);
+                setBaselineOrdersCount(response.data.globalTotal.orders);
             }
         } catch (error) {
             console.error('Failed to fetch orders:', error);
@@ -183,15 +184,21 @@ export default function App() {
         return <TaxBreakdownDetailsPage order={selectedOrder} onClose={() => setSelectedOrder(null)} />;
     }
 
+    const currentTotalOrders = globalTotal?.orders || 0;
     const totalOrdersChangePercent = baselineOrdersCount === null || baselineOrdersCount === 0
-        ? (totalOrdersCount > 0 ? 100 : 0)
-        : ((totalOrdersCount - baselineOrdersCount) / baselineOrdersCount) * 100;
+        ? (currentTotalOrders > 0 ? 100 : 0)
+        : ((currentTotalOrders - baselineOrdersCount) / baselineOrdersCount) * 100;
 
     return (
         <div className="min-h-screen bg-[#F5F2EB] p-4 font-sans text-[#2D2823] sm:p-6 lg:p-8">
             <Header onLogout={handleLogout} />
 
-            <DashboardStats totalOrdersCount={totalOrdersCount} totalOrdersChangePercent={totalOrdersChangePercent} />
+            <DashboardStats 
+                totalOrdersCount={currentTotalOrders} 
+                totalOrdersChangePercent={totalOrdersChangePercent}
+                taxTotal={globalTotal?.tax || '0'}
+                grandTotal={globalTotal?.grand || '0'}
+            />
 
             <div className="relative z-10 mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div className="mb-1 inline-flex rounded-2xl bg-[#2D2823] px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-[#A39E98] sm:mb-4 sm:rounded-[20px] sm:px-6 sm:py-3 sm:text-[11px]">
@@ -230,7 +237,7 @@ export default function App() {
                 </div>
             </div>
 
-            <div className="relative -mt-4 z-0">
+            <div className="relative mt-2 z-0">
                 <OrdersTable
                     orders={apiOrders}
                     onInfoClick={setSelectedOrder}
@@ -238,7 +245,7 @@ export default function App() {
                     retryingOrderIds={retryingOrderIds}
                     currentPage={currentPage}
                     totalPages={pagination?.totalPages || 1}
-                    totalItems={totalOrdersCount}
+                    totalItems={pagination?.total || 0}
                     onPageChange={fetchOrders}
                     isLoading={isLoadingOrders}
                 />

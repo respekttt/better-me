@@ -57,5 +57,10 @@ export interface ApiPagination {
 export interface ApiResponse {
     orders: ApiOrder[];
     pagination: ApiPagination;
+    globalTotal: {
+        orders: number;
+        tax: string;
+        grand: string;
+    };
 }
 

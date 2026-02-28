@@ -1,11 +1,18 @@
-interface DashboardStatsProps{
+interface DashboardStatsProps {
     totalOrdersCount: number;
     totalOrdersChangePercent: number;
+    taxTotal: string;
+    grandTotal: string;
 }
 
-export function DashboardStats({ totalOrdersCount, totalOrdersChangePercent }: DashboardStatsProps) {
+export function DashboardStats({ totalOrdersCount, totalOrdersChangePercent, taxTotal, grandTotal }: DashboardStatsProps) {
     const isPositive = totalOrdersChangePercent >= 0;
     const formattedPercent = `${isPositive ? '+' : ''}${totalOrdersChangePercent.toFixed(1)}%`;
+
+    const formatCurrency = (value: string) => {
+        const num = parseFloat(value);
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(num);
+    };
 
     return (
         <div className="mb-8 grid grid-cols-1 gap-4 sm:mb-10 sm:grid-cols-3 sm:gap-6">
@@ -29,9 +36,19 @@ export function DashboardStats({ totalOrdersCount, totalOrdersChangePercent }: D
                     </span>
                 </div>
                 <p className="text-[#A39E98] text-[10px] uppercase font-bold tracking-widest mb-1">Total Orders</p>
-                <h2 className="text-3xl font-black text-black sm:text-4xl">{totalOrdersCount}</h2>
+                <h2 className="text-3xl font-black text-black sm:text-4xl">{totalOrdersCount.toLocaleString()}</h2>
             </div>
-            <div className="rounded-[24px] border-2 border-dashed border-[#E5E1D8] bg-white p-5 shadow-sm sm:rounded-[30px] sm:p-6"></div>
+
+            <div className="relative rounded-[24px] bg-white p-5 shadow-sm sm:rounded-[30px] sm:p-6">
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[#E8F4FD] text-[#3498DB]">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-6 w-6">
+                        <path d="M12 2v20M17 5H9.5a4.5 4.5 0 1 0 0 9h5a4.5 4.5 0 1 1 0 9H6" />
+                    </svg>
+                </div>
+                <p className="text-[#A39E98] text-[10px] uppercase font-bold tracking-widest mb-1">Grand Total</p>
+                <h2 className="text-2xl font-black text-black sm:text-3xl">{formatCurrency(grandTotal)}</h2>
+            </div>
+
             <div className="relative rounded-[24px] bg-white p-5 shadow-sm sm:rounded-[30px] sm:p-6">
                 <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[#2D2823] text-white">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" className="h-6 w-6">
@@ -41,11 +58,9 @@ export function DashboardStats({ totalOrdersCount, totalOrdersChangePercent }: D
                         <path d="M9 16h6" />
                     </svg>
                 </div>
-                <span className="absolute right-5 top-5 rounded bg-black px-2 py-0.5 text-[9px] font-bold text-white sm:right-6 sm:top-6">URGENT</span>
-                <p className="text-[#A39E98] text-[10px] uppercase font-bold tracking-widest mb-1">Pending Sync</p>
-                <h2 className="text-3xl font-black text-black sm:text-4xl">1</h2>
+                <p className="text-[#A39E98] text-[10px] uppercase font-bold tracking-widest mb-1">Total Tax</p>
+                <h2 className="text-2xl font-black text-black sm:text-3xl">{formatCurrency(taxTotal)}</h2>
             </div>
         </div>
     );
 }
-
