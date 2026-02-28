@@ -6,6 +6,7 @@ import {DashboardStats} from './components/DashboardStats';
 import {OrdersTable} from './components/OrdersTable';
 import {CreateOrderForm} from './components/CreateOrderForm';
 import {ImportCSV} from './components/ImportCSV';
+import {ReloadTableButton} from './components/ReloadTableButton';
 import {TaxBreakdownDetailsPage} from './components/TaxBreakdownDetailsPage';
 import {ImportCsvProcessingPage} from './components/ImportCsvProcessingPage';
 import {mapApiOrderToOrder} from './utils';
@@ -28,6 +29,7 @@ export default function App() {
     const [isImportOpen, setIsImportOpen] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [retryingOrderIds, setRetryingOrderIds] = useState<string[]>([]);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
     
     const [filters, setFilters] = useState({ state: '', county: '', city: '', from: '', to: '' });
     const [appliedFilters, setAppliedFilters] = useState({ state: '', county: '', city: '', from: '', to: '' });
@@ -70,11 +72,19 @@ export default function App() {
         }
     }, [isAuthenticated, fetchOrders]);
     
+    const showSuccessMessage = (message: string) => {
+        setSuccessMessage(message);
+        const timer = setTimeout(() => setSuccessMessage(null), 3000);
+        return () => clearTimeout(timer);
+    };
+
     const handleAddOrder = () => {
+        showSuccessMessage('Order added successfully!');
         fetchOrders(1);
     };
     
     const handleImportSuccess = () => {
+        showSuccessMessage('CSV imported successfully!');
         fetchOrders(1);
     };
 
@@ -204,14 +214,17 @@ export default function App() {
                 <div className="mb-1 inline-flex rounded-2xl bg-[#2D2823] px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-[#A39E98] sm:mb-4 sm:rounded-[20px] sm:px-6 sm:py-3 sm:text-[11px]">
                     Order List & Tax Details
                 </div>
-                <div className="mb-2 flex flex-col gap-2 sm:mb-4 sm:flex-row sm:gap-3">
-                    <ImportCSV onOpen={() => setIsImportOpen(true)} />
-                    <button
-                        onClick={() => setIsModalOpen(true)}
-                        className="flex items-center justify-center gap-2 rounded-full bg-[#FF4D4D] px-5 py-2.5 text-[12px] font-bold text-white shadow-lg shadow-red-100 transition-all hover:cursor-pointer hover:bg-[#ff3b3b] sm:text-[13px]"
-                    >
-                        Manual Entry
-                    </button>
+                <div className="mb-2 flex flex-col gap-2 sm:mb-4 sm:gap-3">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end sm:gap-3">
+                        <ReloadTableButton onReload={() => fetchOrders(currentPage)} isLoading={isLoadingOrders} />
+                        <ImportCSV onOpen={() => setIsImportOpen(true)} />
+                        <button
+                            onClick={() => setIsModalOpen(true)}
+                            className="flex items-center justify-center gap-2 rounded-full bg-[#FF4D4D] px-5 py-2.5 text-[12px] font-bold text-white shadow-lg shadow-red-100 transition-all hover:cursor-pointer hover:bg-[#ff3b3b] sm:text-[13px]"
+                        >
+                            Manual Entry
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -267,6 +280,17 @@ export default function App() {
                     onClose={() => setIsImportOpen(false)}
                     onImportSuccess={handleImportSuccess}
                 />
+            )}
+
+            {successMessage && (
+                <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 animate-in fade-in duration-300">
+                    <div className="flex items-center gap-2 rounded-full bg-[#DFF7EA] px-4 py-2.5 text-[12px] font-bold text-[#27AE60] sm:text-[13px] shadow-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-5">
+                            <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.052-.143z" clipRule="evenodd" />
+                        </svg>
+                        {successMessage}
+                    </div>
+                </div>
             )}
         </div>
     );

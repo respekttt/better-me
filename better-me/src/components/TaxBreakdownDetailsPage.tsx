@@ -105,9 +105,7 @@ export function TaxBreakdownDetailsPage({ order, onClose }: TaxBreakdownDetailsP
                 </div>
 
                 <div className="rounded-b-2xl border-t border-[#ECE8EA] bg-[#EEF1F5] px-4 py-3 flex flex-col-reverse gap-2 sm:px-6 sm:py-4 sm:flex-row sm:justify-end sm:gap-3">
-                    <button className="w-full rounded-xl border border-[#C9D0DB] bg-[#E5EAF1] px-4 py-2 text-xs font-bold text-[#617087] hover:bg-[#dae1ea] hover:cursor-pointer sm:w-auto">
-                        Download PDF
-                    </button>
+                    
                     <button
                         onClick={onClose}
                         className="w-full rounded-xl bg-[#FF4D4D] px-5 py-2 text-xs font-bold text-white hover:bg-[#ef3f3f] hover:cursor-pointer sm:w-auto"

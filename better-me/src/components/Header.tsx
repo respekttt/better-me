@@ -9,7 +9,7 @@ export function Header({ onLogout }: HeaderProps) {
                 <h1 className="flex items-center gap-2 text-3xl font-extrabold tracking-tight text-black sm:text-4xl">BetterMe</h1>
                 <span className="dark-tag ml-1 mt-1 inline-block rounded bg-black px-2 py-1 text-[10px] text-white sm:ml-2 sm:text-xs">Tax Department</span>
             </div>
-            <div className="flex items-center gap-3 sm:gap-4">
+            <div className="flex w-full items-center gap-3 sm:w-auto sm:gap-4">
                 <div className="flex items-center gap-2 rounded-full bg-white px-2 py-1.5 shadow-sm">
                     <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-[#FCE4D6] text-[10px] font-bold text-[#8E5E41]">
                         F

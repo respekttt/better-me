@@ -5,9 +5,8 @@ interface DashboardStatsProps {
     grandTotal: string;
 }
 
-export function DashboardStats({ totalOrdersCount, totalOrdersChangePercent, taxTotal, grandTotal }: DashboardStatsProps) {
-    const isPositive = totalOrdersChangePercent >= 0;
-    const formattedPercent = `${isPositive ? '+' : ''}${totalOrdersChangePercent.toFixed(1)}%`;
+export function DashboardStats({ totalOrdersCount, taxTotal, grandTotal }: DashboardStatsProps) {
+    
 
     const formatCurrency = (value: string) => {
         const num = parseFloat(value);
@@ -31,9 +30,6 @@ export function DashboardStats({ totalOrdersCount, totalOrdersChangePercent, tax
                             <path d="M9 7a3 3 0 1 1 6 0" />
                         </svg>
                     </div>
-                    <span className={`rounded-full px-2 py-1 text-[10px] font-bold sm:text-xs ${isPositive ? 'bg-[#DFF7EA] text-[#27AE60]' : 'bg-[#FDEBEC] text-[#E74C3C]'}`}>
-                        {formattedPercent}
-                    </span>
                 </div>
                 <p className="text-[#A39E98] text-[10px] uppercase font-bold tracking-widest mb-1">Total Orders</p>
                 <h2 className="text-3xl font-black text-black sm:text-4xl">{totalOrdersCount.toLocaleString()}</h2>

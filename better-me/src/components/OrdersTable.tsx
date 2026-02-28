@@ -156,24 +156,26 @@ export function OrdersTable({
                     className="flex flex-col gap-3 border-t border-[#F5F2EB] p-4 text-[11px] font-bold uppercase tracking-widest text-[#A39E98] sm:flex-row sm:items-center sm:justify-between sm:p-6">
                     <div>Displaying {startItem}-{endItem} of {totalItems} units</div>
                     <div className="flex gap-2">
+                        <p className="flex items-center  justify-center text-[#2D2823]">{currentPage} / {totalPages}</p>
                         <button
                             disabled={currentPage <= 1}
                             onClick={() => onPageChange && onPageChange(currentPage - 1)}
-                            className="w-8 h-8 rounded-full border border-[#E5E1D8] flex items-center justify-center hover:bg-gray-50 hover:cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+                            className="w-8 h-8 rounded-full border border-[black] flex items-center justify-center hover:bg-gray-50 hover:cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
                             <svg xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 24 24" fill="currentColor"
+                                viewBox="0 0 24 24" fill="black"
                                 className="size-4">
                                 <path fillRule="evenodd"
                                     d="M7.28 7.72a.75.75 0 0 1 0 1.06l-2.47 2.47H21a.75.75 0 0 1 0 1.5H4.81l2.47 2.47a.75.75 0 1 1-1.06 1.06l-3.75-3.75a.75.75 0 0 1 0-1.06l3.75-3.75a.75.75 0 0 1 1.06 0Z"
                                     clipRule="evenodd" />
                             </svg>
                         </button>
+                        
                         <button
                             disabled={currentPage >= totalPages}
                             onClick={() => onPageChange && onPageChange(currentPage + 1)}
-                            className="w-8 h-8 rounded-full border border-[#E5E1D8] flex items-center justify-center hover:bg-gray-50 hover:cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+                            className="w-8 h-8 rounded-full border border-[black] flex items-center justify-center hover:bg-gray-50 hover:cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
                             <svg xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 24 24" fill="currentColor"
+                                viewBox="0 0 24 24" fill="black"
                                 className="size-4">
                                 <path fillRule="evenodd"
                                     d="M16.72 7.72a.75.75 0 0 1 1.06 0l3.75 3.75a.75.75 0 0 1 0 1.06l-3.75 3.75a.75.75 0 1 1-1.06-1.06l2.47-2.47H3a.75.75 0 0 1 0-1.5h16.19l-2.47-2.47a.75.75 0 0 1 0-1.06Z"
