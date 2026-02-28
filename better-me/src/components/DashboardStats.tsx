@@ -18,7 +18,7 @@ export function DashboardStats({ totalOrdersCount, taxTotal, grandTotal, last24h
     };
 
     return (
-        <div className="mb-8 grid grid-cols-1 gap-4 sm:mb-10 sm:grid-cols-3 sm:gap-6">
+        <div className="mb-8 grid grid-cols-1 gap-4 md:mb-10 md:grid-cols-3 md:gap-6">
             <div className="relative rounded-[24px] bg-white p-5 shadow-sm sm:rounded-[30px] sm:p-6">
                 <div>
                     <div className="mb-4 flex items-center gap-3">
