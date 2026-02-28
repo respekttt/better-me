@@ -8,7 +8,7 @@ interface CreateOrderFormProps {
   onAddOrder: (newOrder: Order) => void;
   onClose: () => void;
 }
-// kibarashka huesos
+
 export function CreateOrderForm({ onAddOrder, onClose }: CreateOrderFormProps) {
   const [formData, setFormData] = useState({
     latitude: "",
