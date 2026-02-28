@@ -18,6 +18,7 @@ export default function App() {
     const [apiOrders, setApiOrders] = useState<Order[]>([]);
     const [pagination, setPagination] = useState<ApiPagination | null>(null);
     const [globalTotal, setGlobalTotal] = useState<ApiResponse['globalTotal'] | null>(null);
+    const [last24h, setLast24h] = useState<ApiResponse['last24h'] | null>(null);
     const [isLoadingOrders, setIsLoadingOrders] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
 
@@ -28,8 +29,8 @@ export default function App() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isImportOpen, setIsImportOpen] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-    const [retryingOrderIds, setRetryingOrderIds] = useState<string[]>([]);
-    const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const [toastMessage, setToastMessage] = useState<{title: string, desc?: string} | null>(null);
+    const [isToastVisible, setIsToastVisible] = useState(false);
     
     const [filters, setFilters] = useState({ state: '', county: '', city: '', from: '', to: '' });
     const [appliedFilters, setAppliedFilters] = useState({ state: '', county: '', city: '', from: '', to: '' });
@@ -49,10 +50,11 @@ export default function App() {
             if (appliedFilters.from) params.append('from', appliedFilters.from);
             if (appliedFilters.to) params.append('to', appliedFilters.to);
 
-            const response = await axios.get<ApiResponse>(`https://wellness-tax-api-762050733390.europe-central2.run.app/orders?${params.toString()}`);
+            const response = await axios.get<ApiResponse>(`${import.meta.env.VITE_API_URL}/orders?${params.toString()}`);
             setApiOrders(response.data.orders.map(mapApiOrderToOrder));
             setPagination(response.data.pagination);
             setGlobalTotal(response.data.globalTotal);
+            setLast24h(response.data.last24h);
             setCurrentPage(response.data.pagination.page);
             
             const isNoFilters = Object.values(appliedFilters).every(v => !v);
@@ -72,48 +74,23 @@ export default function App() {
         }
     }, [isAuthenticated, fetchOrders]);
     
-    const showSuccessMessage = (message: string) => {
-        setSuccessMessage(message);
-        const timer = setTimeout(() => setSuccessMessage(null), 3000);
-        return () => clearTimeout(timer);
+    const showToast = (title: string, desc?: string) => {
+        setToastMessage({ title, desc });
+        setIsToastVisible(true);
+        setTimeout(() => {
+            setIsToastVisible(false);
+            setTimeout(() => setToastMessage(null), 300); // Wait for transition
+        }, 6000); // Display for 6 seconds
     };
 
     const handleAddOrder = () => {
-        showSuccessMessage('Order added successfully!');
+        showToast('Order added successfully!', 'Your new order has been created and synced.');
         fetchOrders(1);
     };
     
     const handleImportSuccess = () => {
-        showSuccessMessage('CSV imported successfully!');
+        showToast('File processing started', 'Your file has started processing, it may take some time...');
         fetchOrders(1);
-    };
-
-    const handleRetryOrder = (orderId: string) => {
-        if (retryingOrderIds.includes(orderId)) return;
-
-        setRetryingOrderIds((prev) => [...prev, orderId]);
-        window.setTimeout(() => {
-            const updateOrder = (order: Order) => {
-                if (order.id !== orderId) return order;
-
-                const nextLatitude = Number((34 + Math.random() * 15).toFixed(4));
-                const nextLongitude = Number((-120 + Math.random() * 40).toFixed(4));
-                const taxAmount = Number((order.subtotal * order.composite_tax_rate).toFixed(2));
-                const totalAmount = Number((order.subtotal + taxAmount).toFixed(2));
-
-                return {
-                    ...order,
-                    status: 'completed',
-                    latitude: nextLatitude,
-                    longitude: nextLongitude,
-                    tax_amount: taxAmount,
-                    total_amount: totalAmount
-                } as Order;
-            };
-
-            setApiOrders((prevOrders) => prevOrders.map(updateOrder));
-            setRetryingOrderIds((prev) => prev.filter((id) => id !== orderId));
-        }, 1200);
     };
 
     const handleLoginSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -190,10 +167,6 @@ export default function App() {
         );
     }
 
-    if (selectedOrder) {
-        return <TaxBreakdownDetailsPage order={selectedOrder} onClose={() => setSelectedOrder(null)} />;
-    }
-
     const currentTotalOrders = globalTotal?.orders || 0;
     const totalOrdersChangePercent = baselineOrdersCount === null || baselineOrdersCount === 0
         ? (currentTotalOrders > 0 ? 100 : 0)
@@ -208,6 +181,7 @@ export default function App() {
                 totalOrdersChangePercent={totalOrdersChangePercent}
                 taxTotal={globalTotal?.tax || '0'}
                 grandTotal={globalTotal?.grand || '0'}
+                last24h={last24h}
             />
 
             <div className="relative z-10 mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -254,8 +228,6 @@ export default function App() {
                 <OrdersTable
                     orders={apiOrders}
                     onInfoClick={setSelectedOrder}
-                    onRetryOrder={handleRetryOrder}
-                    retryingOrderIds={retryingOrderIds}
                     currentPage={currentPage}
                     totalPages={pagination?.totalPages || 1}
                     totalItems={pagination?.total || 0}
@@ -282,13 +254,34 @@ export default function App() {
                 />
             )}
 
-            {successMessage && (
-                <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 animate-in fade-in duration-300">
-                    <div className="flex items-center gap-2 rounded-full bg-[#DFF7EA] px-4 py-2.5 text-[12px] font-bold text-[#27AE60] sm:text-[13px] shadow-lg">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-5">
-                            <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.052-.143z" clipRule="evenodd" />
-                        </svg>
-                        {successMessage}
+            {selectedOrder && (
+                <TaxBreakdownDetailsPage 
+                    order={selectedOrder} 
+                    onClose={() => setSelectedOrder(null)} 
+                />
+            )}
+
+            {toastMessage && (
+                <div className={`fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 transition-all duration-300 ease-in-out transform ${
+                    isToastVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+                }`}>
+                    <div className="flex items-start gap-3 rounded-2xl bg-[#2D2823] p-4 pr-12 shadow-2xl ring-1 ring-white/10 max-w-sm relative">
+                        <div className="mt-0.5 flex shrink-0 items-center justify-center rounded-full bg-[#DFF7EA]/10 p-1.5 text-[#27AE60]">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-5">
+                                <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.052-.143z" clipRule="evenodd" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 className="text-[13px] font-bold text-white">{toastMessage.title}</h3>
+                            {toastMessage.desc && (
+                                <p className="mt-1 text-[11px] font-medium leading-relaxed text-[#A39E98]">{toastMessage.desc}</p>
+                            )}
+                        </div>
+                        <button onClick={() => setIsToastVisible(false)} className="absolute right-4 top-4 text-[#A39E98] hover:text-white transition-colors hover:cursor-pointer">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-4">
+                                <path fillRule="evenodd" d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
+                            </svg>
+                        </button>
                     </div>
                 </div>
             )}

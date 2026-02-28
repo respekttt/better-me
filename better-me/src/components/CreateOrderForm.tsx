@@ -33,7 +33,7 @@ export function CreateOrderForm({ onAddOrder, onClose }: CreateOrderFormProps) {
         timestamp: formatToApiTimestamp(new Date())
       };
 
-      const response = await axios.post<ApiOrder>("https://wellness-tax-api-762050733390.europe-central2.run.app/orders", payload);
+      const response = await axios.post<ApiOrder>(`${import.meta.env.VITE_API_URL}/orders`, payload);
       
       const newOrder = mapApiOrderToOrder(response.data);
       onAddOrder(newOrder);

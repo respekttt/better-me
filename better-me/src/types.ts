@@ -62,5 +62,10 @@ export interface ApiResponse {
         tax: string;
         grand: string;
     };
+    last24h: {
+        orders: number;
+        tax: string;
+        grand: string;
+    };
 }
 

@@ -71,7 +71,7 @@ export function ImportCsvProcessingPage({ onClose, onImportSuccess }: ImportCsvP
     formData.append("file", selectedFile);
 
     try {
-      await axios.post("https://wellness-tax-api-762050733390.europe-central2.run.app/orders/import", formData, {
+      await axios.post(`${import.meta.env.VITE_API_URL}/orders/import`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
