@@ -23,8 +23,8 @@
 
 1.  **Клонуйте репозиторій:**
     ```bash
-    git clone <repository-url>
-    cd better-me
+    git clone https://github.com/respekttt/better-me.git
+    cd better-me/better-me
     ```
 
 2.  **Встановіть залежності:**
