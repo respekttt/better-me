@@ -10,7 +10,7 @@ export function Header({ onLogout }: HeaderProps) {
                 <span className="dark-tag ml-1 mt-1 inline-block rounded bg-black px-2 py-1 text-[10px] text-white sm:ml-2 sm:text-xs">Tax Department</span>
             </div>
             <div className="flex w-full items-center gap-3 sm:w-auto sm:gap-4">
-                <div className="relative w-full sm:w-64">
+                {/* <div className="relative w-full sm:w-64">
                     <svg
                         className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
                         viewBox="0 0 24 24"
@@ -29,7 +29,7 @@ export function Header({ onLogout }: HeaderProps) {
                         placeholder="Search orders..."
                         className="w-full rounded-full border border-transparent bg-white py-2 pl-10 pr-4 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-300 sm:pr-5"
                     />
-                </div>
+                </div> */}
                 <div className="flex items-center gap-2 rounded-full bg-white px-2 py-1.5 shadow-sm">
                     <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-[#FCE4D6] text-[10px] font-bold text-[#8E5E41]">
                         F
