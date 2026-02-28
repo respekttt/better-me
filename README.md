@@ -1,73 +1,43 @@
-# React + TypeScript + Vite
+# BetterMe Admin Dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Адмін-панель для управління замовленнями та аналізу податкових нарахувань. Проєкт побудований на стеку React + TypeScript + Vite з використанням Tailwind CSS для стилізації.
 
-Currently, two official plugins are available:
+## 🚀 Основні можливості
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+*   **📊 Дашборд статистики:** Швидкий огляд загальної кількості замовлень, сумарних податків та загального обороту з динамікою за останні 24 години.
+*   **📍 Інтеграція з Google Maps:** У таблиці замовлень натиснувши на координати (широта та довгота), ви автоматично перейдете на точку розташування замовлення в Google Maps.
+*   **📑 Детальна податкова аналітика:** Натиснувши на іконку інформації (ℹ️) у стовпці "Info", ви відкриєте детальне вікно з розбивкою податкових ставок (штат, округ, місто, спеціальні збори) та переліком усіх використаних юрисдикцій.
+*   **🔍 Гнучка фільтрація:** Можливість фільтрувати замовлення за штатом, округом, містом та діапазоном дат.
+*   **📥 Імпорт CSV:** Підтримка масового завантаження даних через CSV-файли з візуалізацією процесу обробки.
+*   **➕ Ручне введення:** Зручна форма для створення нових замовлень безпосередньо через інтерфейс.
+*   **🔐 Авторизація:** Захищений доступ до панелі керування (за замовчуванням: `admin` / `admin123`).
 
-## React Compiler
+## 🛠 Технологічний стек
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+*   **Frontend:** React 19, TypeScript, Vite
+*   **UI & Styling:** Tailwind CSS, Ant Design (icons & components)
+*   **HTTP Client:** Axios
+*   **Build Tool:** Vite
 
-## Expanding the ESLint configuration
+## 📦 Встановлення та запуск
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+1.  **Клонуйте репозиторій:**
+    ```bash
+    git clone <repository-url>
+    cd better-me
+    ```
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+2.  **Встановіть залежності:**
+    ```bash
+    npm install
+    ```
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+3.  **Запустіть проєкт у режимі розробки:**
+    ```bash
+    npm run dev
+    ```
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+4.  **Зберіть проєкт для продакшну:**
+    ```bash
+    npm run build
+    ```
