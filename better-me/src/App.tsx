@@ -28,18 +28,32 @@ export default function App() {
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [retryingOrderIds, setRetryingOrderIds] = useState<string[]>([]);
     
+    const [filters, setFilters] = useState({ state: '', county: '', city: '', from: '', to: '' });
+    const [appliedFilters, setAppliedFilters] = useState({ state: '', county: '', city: '', from: '', to: '' });
+
     const totalOrdersCount = pagination?.total || 0;
     const [baselineOrdersCount, setBaselineOrdersCount] = useState<number | null>(null);
 
     const fetchOrders = useCallback(async (page: number) => {
         setIsLoadingOrders(true);
         try {
-            const response = await axios.get<ApiResponse>(`https://wellness-tax-api-762050733390.europe-central2.run.app/orders?page=${page}&limit=10`);
+            const params = new URLSearchParams({
+                page: String(page),
+                limit: '10'
+            });
+            if (appliedFilters.state) params.append('state', appliedFilters.state);
+            if (appliedFilters.county) params.append('county', appliedFilters.county);
+            if (appliedFilters.city) params.append('city', appliedFilters.city);
+            if (appliedFilters.from) params.append('from', appliedFilters.from);
+            if (appliedFilters.to) params.append('to', appliedFilters.to);
+
+            const response = await axios.get<ApiResponse>(`https://wellness-tax-api-762050733390.europe-central2.run.app/orders?${params.toString()}`);
             setApiOrders(response.data.orders.map(mapApiOrderToOrder));
             setPagination(response.data.pagination);
             setCurrentPage(response.data.pagination.page);
             
-            if (baselineOrdersCount === null) {
+            const isNoFilters = Object.values(appliedFilters).every(v => !v);
+            if (baselineOrdersCount === null && isNoFilters) {
                 setBaselineOrdersCount(response.data.pagination.total);
             }
         } catch (error) {
@@ -47,7 +61,7 @@ export default function App() {
         } finally {
             setIsLoadingOrders(false);
         }
-    }, [baselineOrdersCount]);
+    }, [baselineOrdersCount, appliedFilters]);
 
     useEffect(() => {
         if (isAuthenticated) {
@@ -109,6 +123,21 @@ export default function App() {
         setIsAuthenticated(false);
         setLogin('');
         setPassword('');
+    };
+
+    const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setFilters(prev => ({ ...prev, [name]: value }));
+    };
+
+    const applyFilters = () => {
+        setAppliedFilters(filters);
+    };
+
+    const clearFilters = () => {
+        const empty = { state: '', county: '', city: '', from: '', to: '' };
+        setFilters(empty);
+        setAppliedFilters(empty);
     };
 
     if (!isAuthenticated) {
@@ -176,6 +205,28 @@ export default function App() {
                     >
                         Manual Entry
                     </button>
+                </div>
+            </div>
+
+            <div className="mb-4 grid gap-3 rounded-[20px] border border-[#E5E1D8] bg-white p-4 shadow-sm z-10 relative">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <input type="text" name="state" placeholder="State" value={filters.state} onChange={handleFilterChange} className="w-full rounded-xl border border-[#E5E1D8] px-3 py-2 text-xs outline-none focus:ring-1 focus:ring-gray-300" />
+                    <input type="text" name="county" placeholder="County" value={filters.county} onChange={handleFilterChange} className="w-full rounded-xl border border-[#E5E1D8] px-3 py-2 text-xs outline-none focus:ring-1 focus:ring-gray-300" />
+                    <input type="text" name="city" placeholder="City" value={filters.city} onChange={handleFilterChange} className="w-full rounded-xl border border-[#E5E1D8] px-3 py-2 text-xs outline-none focus:ring-1 focus:ring-gray-300" />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-3 items-center">
+                    <label className="flex items-center gap-2 text-xs text-[#8E8B85] font-semibold w-full">
+                        <span>From:</span>
+                        <input type="date" name="from" value={filters.from} onChange={handleFilterChange} className="flex-1 rounded-xl border border-[#E5E1D8] px-3 py-2 text-xs outline-none focus:ring-1 focus:ring-gray-300" />
+                    </label>
+                    <label className="flex items-center gap-2 text-xs text-[#8E8B85] font-semibold w-full">
+                        <span>To:</span>
+                        <input type="date" name="to" value={filters.to} onChange={handleFilterChange} className="flex-1 rounded-xl border border-[#E5E1D8] px-3 py-2 text-xs outline-none focus:ring-1 focus:ring-gray-300" />
+                    </label>
+                    <div className="flex gap-2 h-full">
+                        <button onClick={applyFilters} className="px-6 rounded-xl bg-[#2D2823] text-xs font-bold text-white transition-colors hover:cursor-pointer hover:bg-black h-full py-2">Apply</button>
+                        <button onClick={clearFilters} className="px-6 rounded-xl border border-[#E5E1D8] text-xs font-bold text-[#2D2823] transition-colors hover:cursor-pointer hover:bg-gray-50 h-full py-2">Clear</button>
+                    </div>
                 </div>
             </div>
 
