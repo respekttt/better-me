@@ -1,5 +1,6 @@
 import {type DragEvent, useRef, useState} from "react";
 import axios from "axios";
+import {API_URL} from "../config";
 
 interface ImportCsvProcessingPageProps {
   onClose: () => void;
@@ -71,7 +72,7 @@ export function ImportCsvProcessingPage({ onClose, onImportSuccess }: ImportCsvP
     formData.append("file", selectedFile);
 
     try {
-      await axios.post(`${import.meta.env.VITE_API_URL}/orders/import`, formData, {
+      await axios.post(`${API_URL}/orders/import`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },

@@ -2,6 +2,7 @@ import {useState} from "react";
 import axios from "axios";
 import type {Order, ApiOrder} from "../types";
 import {mapApiOrderToOrder, formatToApiTimestamp} from "../utils";
+import {API_URL} from "../config";
 
 interface CreateOrderFormProps {
   onAddOrder: (newOrder: Order) => void;
@@ -33,7 +34,7 @@ export function CreateOrderForm({ onAddOrder, onClose }: CreateOrderFormProps) {
         timestamp: formatToApiTimestamp(new Date())
       };
 
-      const response = await axios.post<ApiOrder>(`${import.meta.env.VITE_API_URL}/orders`, payload);
+      const response = await axios.post<ApiOrder>(`${API_URL}/orders`, payload);
       
       const newOrder = mapApiOrderToOrder(response.data);
       onAddOrder(newOrder);

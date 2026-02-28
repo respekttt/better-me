@@ -1,6 +1,7 @@
 import {type FormEvent, useEffect, useState, useCallback} from 'react';
 import axios from 'axios';
 import {type Order, type ApiPagination, type ApiResponse} from './types';
+import {API_URL} from './config';
 import {Header} from './components/Header';
 import {DashboardStats} from './components/DashboardStats';
 import {OrdersTable} from './components/OrdersTable';
@@ -50,7 +51,7 @@ export default function App() {
             if (appliedFilters.from) params.append('from', appliedFilters.from);
             if (appliedFilters.to) params.append('to', appliedFilters.to);
 
-            const response = await axios.get<ApiResponse>(`${import.meta.env.VITE_API_URL}/orders?${params.toString()}`);
+            const response = await axios.get<ApiResponse>(`${API_URL}/orders?${params.toString()}`);
             setApiOrders(response.data.orders.map(mapApiOrderToOrder));
             setPagination(response.data.pagination);
             setGlobalTotal(response.data.globalTotal);
