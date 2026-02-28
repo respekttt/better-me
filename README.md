@@ -18,26 +18,3 @@
 *   **UI & Styling:** Tailwind CSS, Ant Design (icons & components)
 *   **HTTP Client:** Axios
 *   **Build Tool:** Vite
-
-## 📦 Встановлення та запуск
-
-1.  **Клонуйте репозиторій:**
-    ```bash
-    git clone https://github.com/respekttt/better-me.git
-    cd better-me/better-me
-    ```
-
-2.  **Встановіть залежності:**
-    ```bash
-    npm install
-    ```
-
-3.  **Запустіть проєкт у режимі розробки:**
-    ```bash
-    npm run dev
-    ```
-
-4.  **Зберіть проєкт для продакшну:**
-    ```bash
-    npm run build
-    ```
