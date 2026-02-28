@@ -1,9 +1,9 @@
 import {type DragEvent, useRef, useState} from "react";
-import type {Order} from "../types";
+import axios from "axios";
 
 interface ImportCsvProcessingPageProps {
   onClose: () => void;
-  onImportSuccess: (newOrders: Order[]) => void;
+  onImportSuccess: () => void;
 }
 
 export function ImportCsvProcessingPage({ onClose, onImportSuccess }: ImportCsvProcessingPageProps) {
@@ -11,11 +11,33 @@ export function ImportCsvProcessingPage({ onClose, onImportSuccess }: ImportCsvP
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isDragActive, setIsDragActive] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const validateAndSetFile = (file: File) => {
+    setError(null);
+    
+    // Check if it's a CSV file
+    if (!file.name.toLowerCase().endsWith('.csv') && file.type !== 'text/csv') {
+      setError("Only CSV files are allowed.");
+      setSelectedFile(null);
+      return;
+    }
+
+    // Check size limit (10MB)
+    const MAX_SIZE = 10 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      setError("File size exceeds 10MB limit.");
+      setSelectedFile(null);
+      return;
+    }
+
+    setSelectedFile(file);
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setSelectedFile(file);
+    validateAndSetFile(file);
   };
 
   const handleDragOver = (event: DragEvent<HTMLElement>) => {
@@ -37,48 +59,34 @@ export function ImportCsvProcessingPage({ onClose, onImportSuccess }: ImportCsvP
 
     const file = event.dataTransfer.files?.[0];
     if (!file) return;
-    setSelectedFile(file);
+    validateAndSetFile(file);
   };
 
-  const handleUpload = () => {
+  const handleUpload = async () => {
     if (!selectedFile || isUploading) return;
     setIsUploading(true);
+    setError(null);
 
-    setTimeout(() => {
-      const now = Date.now();
-      const mockImportedOrders: Order[] = [
-        {
-          id: `ord_csv_${now}_1`,
-          timestamp: new Date().toISOString(),
-          latitude: 40.758,
-          longitude: -73.9855,
-          subtotal: 45.0,
-          composite_tax_rate: 0.08875,
-          tax_amount: 3.99,
-          total_amount: 48.99,
-          breakdown: { state_rate: 0.04, county_rate: 0, city_rate: 0.045, special_rates: 0.00375 },
-          status: "completed",
-        },
-        {
-          id: `ord_csv_${now}_2`,
-          timestamp: new Date().toISOString(),
-          latitude: 40.7829,
-          longitude: -73.9654,
-          subtotal: 15.5,
-          composite_tax_rate: 0.08875,
-          tax_amount: 1.37,
-          total_amount: 16.87,
-          breakdown: { state_rate: 0.04, county_rate: 0, city_rate: 0.045, special_rates: 0.00375 },
-          status: "processing",
-        },
-      ];
+    const formData = new FormData();
+    formData.append("file", selectedFile);
 
-      onImportSuccess(mockImportedOrders);
-      setIsUploading(false);
+    try {
+      await axios.post("https://wellness-tax-api-762050733390.europe-central2.run.app/orders/import", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      onImportSuccess();
       setSelectedFile(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
       onClose();
-    }, 1200);
+    } catch (err) {
+      console.error("Import failed:", err);
+      setError("Failed to import CSV. Please check the file format and try again.");
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   return (
@@ -100,6 +108,7 @@ export function ImportCsvProcessingPage({ onClose, onImportSuccess }: ImportCsvP
             <button
               type="button"
               onClick={onClose}
+              disabled={isUploading}
               className="text-[#97A5BD] transition-colors hover:cursor-pointer hover:text-[#6F7F98]"
               aria-label="Close import csv"
             >
@@ -116,7 +125,7 @@ export function ImportCsvProcessingPage({ onClose, onImportSuccess }: ImportCsvP
 
           <input
             type="file"
-            accept=".csv,.xls,.xlsx"
+            accept=".csv"
             ref={fileInputRef}
             onChange={handleFileChange}
             className="hidden"
@@ -128,6 +137,7 @@ export function ImportCsvProcessingPage({ onClose, onImportSuccess }: ImportCsvP
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
+            disabled={isUploading}
             className={`mt-5 block w-full rounded-[24px] border-2 border-dashed px-4 py-8 text-center transition-colors sm:py-12 hover:cursor-pointer ${
               isDragActive
                 ? "border-[#FF7B7B] bg-[#FBECEE]"
@@ -149,12 +159,14 @@ export function ImportCsvProcessingPage({ onClose, onImportSuccess }: ImportCsvP
             )}
           </button>
 
+          {error && <p className="mt-2 text-center text-xs font-bold text-red-500">{error}</p>}
+
           <div className="mt-3 flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-[#B4AFAC] sm:text-[11px]">
             <span className="inline-flex items-center gap-1.5">
               <span className="size-2 rounded-full bg-[#BCB8B6]" />
-              Max size: 25mb
+              Max size: 10MB
             </span>
-            <span>Formats: CSV, XLS</span>
+            <span>Format: CSV</span>
           </div>
         </div>
 
@@ -162,7 +174,8 @@ export function ImportCsvProcessingPage({ onClose, onImportSuccess }: ImportCsvP
           <button
             type="button"
             onClick={onClose}
-            className="w-full py-2 text-[12px] font-black uppercase tracking-widest text-[#838B97] transition-colors hover:text-[#5f6977] sm:w-auto sm:px-5 hover:cursor-pointer"
+            disabled={isUploading}
+            className="w-full py-2 text-[12px] font-black uppercase tracking-widest text-[#838B97] transition-colors hover:text-[#5f6977] sm:w-auto sm:px-5 hover:cursor-pointer disabled:opacity-50"
           >
             Cancel
           </button>
@@ -175,8 +188,12 @@ export function ImportCsvProcessingPage({ onClose, onImportSuccess }: ImportCsvP
             }`}
           >
             <span className="inline-flex items-center gap-2">
-              <svg viewBox="0 0 24 24" fill="currentColor" className="size-4" aria-hidden="true">
-                <path d="M4 4h16v16H4V4Zm7 3v4H8l4 4 4-4h-3V7h-2Z" />
+              <svg viewBox="0 0 24 24" fill="currentColor" className={`size-4 ${isUploading ? 'animate-spin' : ''}`} aria-hidden="true">
+                {isUploading ? (
+                  <path d="M12 21a9 9 0 1 1 6.18-2.55L16.77 17a7 7 0 1 0-4.77 2z" />
+                ) : (
+                  <path d="M4 4h16v16H4V4Zm7 3v4H8l4 4 4-4h-3V7h-2Z" />
+                )}
               </svg>
               {isUploading ? "Uploading..." : "Upload & Process"}
             </span>

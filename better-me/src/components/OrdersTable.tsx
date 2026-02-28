@@ -1,17 +1,39 @@
 import type { Order } from "../types";
 
-interface OrdersTableProps{
+interface OrdersTableProps {
     orders: Order[];
     onInfoClick: (order: Order) => void;
     onRetryOrder: (orderId: string) => void;
     retryingOrderIds: string[];
+    currentPage?: number;
+    totalPages?: number;
+    totalItems?: number;
+    onPageChange?: (page: number) => void;
+    isLoading?: boolean;
 }
 
+export function OrdersTable({
+    orders,
+    onInfoClick,
+    onRetryOrder,
+    retryingOrderIds,
+    currentPage = 1,
+    totalPages = 1,
+    totalItems = 0,
+    onPageChange,
+    isLoading = false
+}: OrdersTableProps) {
+    const startItem = totalItems === 0 ? 0 : (currentPage - 1) * 10 + 1;
+    const endItem = Math.min(currentPage * 10, totalItems);
 
-export function OrdersTable({orders, onInfoClick, onRetryOrder, retryingOrderIds}: OrdersTableProps) {
     return (
         <div className="overflow-hidden rounded-b-3xl rounded-tl-3xl border border-[#E5E1D8] bg-white shadow-sm sm:rounded-b-4xl sm:rounded-tl-4xl">
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto relative">
+                {isLoading && (
+                    <div className="absolute inset-0 z-10 bg-white/50 backdrop-blur-[1px] flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FF4D4D]"></div>
+                    </div>
+                )}
             <table className="min-w-[980px] w-full text-left">
                 <thead
                     className="bg-[#2D2823] text-[#A39E98] text-[10px] uppercase tracking-widest font-bold">
@@ -119,38 +141,47 @@ export function OrdersTable({orders, onInfoClick, onRetryOrder, retryingOrderIds
                             </td>
                         </tr>
                     ))}
+                    {orders.length === 0 && !isLoading && (
+                        <tr>
+                            <td colSpan={7} className="px-4 py-8 text-center text-[#A39E98] font-bold">No orders found.</td>
+                        </tr>
+                    )}
                 </tbody>
             </table>
             </div>
 
-            <div
-                className="flex flex-col gap-3 border-t border-[#F5F2EB] p-4 text-[11px] font-bold uppercase tracking-widest text-[#A39E98] sm:flex-row sm:items-center sm:justify-between sm:p-6">
-                <div>Displaying 1-5 of 12,450 units</div>
-                <div className="flex gap-2">
-                    <button
-                        className="w-8 h-8 rounded-full border border-[#E5E1D8] flex items-center justify-center hover:bg-gray-50 hover:cursor-pointer">
-                        <svg xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24" fill="currentColor"
-                            className="size-4">
-                            <path fillRule="evenodd"
-                                d="M7.28 7.72a.75.75 0 0 1 0 1.06l-2.47 2.47H21a.75.75 0 0 1 0 1.5H4.81l2.47 2.47a.75.75 0 1 1-1.06 1.06l-3.75-3.75a.75.75 0 0 1 0-1.06l3.75-3.75a.75.75 0 0 1 1.06 0Z"
-                                clipRule="evenodd" />
-                        </svg>
-
-                    </button>
-                    <button
-                        className="w-8 h-8 rounded-full border border-[#E5E1D8] flex items-center justify-center hover:bg-gray-50 hover:cursor-pointer">
-                        <svg xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24" fill="currentColor"
-                            className="size-4">
-                            <path fillRule="evenodd"
-                                d="M16.72 7.72a.75.75 0 0 1 1.06 0l3.75 3.75a.75.75 0 0 1 0 1.06l-3.75 3.75a.75.75 0 1 1-1.06-1.06l2.47-2.47H3a.75.75 0 0 1 0-1.5h16.19l-2.47-2.47a.75.75 0 0 1 0-1.06Z"
-                                clipRule="evenodd" />
-                        </svg>
-
-                    </button>
+            {totalItems > 0 && (
+                <div
+                    className="flex flex-col gap-3 border-t border-[#F5F2EB] p-4 text-[11px] font-bold uppercase tracking-widest text-[#A39E98] sm:flex-row sm:items-center sm:justify-between sm:p-6">
+                    <div>Displaying {startItem}-{endItem} of {totalItems} units</div>
+                    <div className="flex gap-2">
+                        <button
+                            disabled={currentPage <= 1}
+                            onClick={() => onPageChange && onPageChange(currentPage - 1)}
+                            className="w-8 h-8 rounded-full border border-[#E5E1D8] flex items-center justify-center hover:bg-gray-50 hover:cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24" fill="currentColor"
+                                className="size-4">
+                                <path fillRule="evenodd"
+                                    d="M7.28 7.72a.75.75 0 0 1 0 1.06l-2.47 2.47H21a.75.75 0 0 1 0 1.5H4.81l2.47 2.47a.75.75 0 1 1-1.06 1.06l-3.75-3.75a.75.75 0 0 1 0-1.06l3.75-3.75a.75.75 0 0 1 1.06 0Z"
+                                    clipRule="evenodd" />
+                            </svg>
+                        </button>
+                        <button
+                            disabled={currentPage >= totalPages}
+                            onClick={() => onPageChange && onPageChange(currentPage + 1)}
+                            className="w-8 h-8 rounded-full border border-[#E5E1D8] flex items-center justify-center hover:bg-gray-50 hover:cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24" fill="currentColor"
+                                className="size-4">
+                                <path fillRule="evenodd"
+                                    d="M16.72 7.72a.75.75 0 0 1 1.06 0l3.75 3.75a.75.75 0 0 1 0 1.06l-3.75 3.75a.75.75 0 1 1-1.06-1.06l2.47-2.47H3a.75.75 0 0 1 0-1.5h16.19l-2.47-2.47a.75.75 0 0 1 0-1.06Z"
+                                    clipRule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 }

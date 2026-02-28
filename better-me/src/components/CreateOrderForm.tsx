@@ -1,5 +1,7 @@
 import {useState} from "react";
-import type {Order} from "../types";
+import axios from "axios";
+import type {Order, ApiOrder} from "../types";
+import {mapApiOrderToOrder, formatToApiTimestamp} from "../utils";
 
 interface CreateOrderFormProps {
   onAddOrder: (newOrder: Order) => void;
@@ -12,32 +14,36 @@ export function CreateOrderForm({ onAddOrder, onClose }: CreateOrderFormProps) {
     longitude: "",
     subtotal: ""
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.latitude || !formData.longitude || !formData.subtotal) return;
-    const newOrder: Order = {
-      id: `ord_${Date.now()}`,
-      timestamp: new Date().toISOString(),
-      latitude: Number(formData.latitude),
-      longitude: Number(formData.longitude),
-      subtotal: Number(formData.subtotal),
-      composite_tax_rate: 0.08875,
-      tax_amount: Number(formData.subtotal) * 0.08875,
-      total_amount: Number(formData.subtotal) * 1.08875,
-      breakdown: {
-        state_rate: 0.04,
-        county_rate: 0,
-        city_rate: 0.045,
-        special_rates: 0.00375,
-      },
-      jurisdictions: ["New York State", "New York City"],
-      status: "processing",
-    };
+    
+    setIsSubmitting(true);
+    setError(null);
 
-    onAddOrder(newOrder);
-    onClose();
+    try {
+      const payload = {
+        latitude: Number(formData.latitude),
+        longitude: Number(formData.longitude),
+        subtotal: Number(formData.subtotal),
+        timestamp: formatToApiTimestamp(new Date())
+      };
+
+      const response = await axios.post<ApiOrder>("https://wellness-tax-api-762050733390.europe-central2.run.app/orders", payload);
+      
+      const newOrder = mapApiOrderToOrder(response.data);
+      onAddOrder(newOrder);
+      onClose();
+    } catch (err) {
+      console.error("Failed to create order:", err);
+      setError("Failed to create order. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -51,6 +57,7 @@ export function CreateOrderForm({ onAddOrder, onClose }: CreateOrderFormProps) {
           onClick={onClose}
           className="text-[#A6A9B1] hover:text-[#7A7E89] transition-colors hover:cursor-pointer"
           aria-label="Close"
+          disabled={isSubmitting}
         >
           <svg viewBox="0 0 24 24" fill="none" className="size-5" aria-hidden="true">
             <path d="M6 6l12 12M18 6 6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
@@ -74,6 +81,7 @@ export function CreateOrderForm({ onAddOrder, onClose }: CreateOrderFormProps) {
               value={formData.latitude}
               onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
               className="w-full bg-transparent text-[13px] font-semibold text-[#4E5564] placeholder:text-[#BABFC9] focus:outline-none"
+              disabled={isSubmitting}
             />
           </span>
         </label>
@@ -89,6 +97,7 @@ export function CreateOrderForm({ onAddOrder, onClose }: CreateOrderFormProps) {
               value={formData.longitude}
               onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
               className="w-full bg-transparent text-[13px] font-semibold text-[#4E5564] placeholder:text-[#BABFC9] focus:outline-none"
+              disabled={isSubmitting}
             />
           </span>
         </label>
@@ -106,11 +115,14 @@ export function CreateOrderForm({ onAddOrder, onClose }: CreateOrderFormProps) {
               value={formData.subtotal}
               onChange={(e) => setFormData({ ...formData, subtotal: e.target.value })}
               className="w-full min-w-0 bg-transparent text-[16px] font-bold text-[#4E5564] placeholder:text-[#BABFC9] focus:outline-none"
+              disabled={isSubmitting}
             />
           </span>
           <span className="rounded-full bg-[#DCDEE2] px-2.5 py-0.5 text-[10px] font-bold text-[#A3A8B3]">USD</span>
         </span>
       </label>
+
+      {error && <p className="text-[10px] font-bold text-red-500 text-center">{error}</p>}
 
       <div className="rounded-2xl bg-[#F3F3F5] px-3.5 py-3">
         <div className="flex items-start gap-2.5">
@@ -128,19 +140,25 @@ export function CreateOrderForm({ onAddOrder, onClose }: CreateOrderFormProps) {
       <div className="space-y-2.5 pt-1">
         <button
           type="submit"
-          className="w-full rounded-full bg-[#FF4141] px-5 py-3 text-[12px] font-black uppercase tracking-wide text-white shadow-[0_10px_18px_rgba(255,65,65,0.35)] hover:bg-[#f23737] transition-colors hover:cursor-pointer"
+          disabled={isSubmitting}
+          className="w-full rounded-full bg-[#FF4141] px-5 py-3 text-[12px] font-black uppercase tracking-wide text-white shadow-[0_10px_18px_rgba(255,65,65,0.35)] hover:bg-[#f23737] transition-colors hover:cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
         >
           <span className="inline-flex items-center gap-2">
-            <svg viewBox="0 0 24 24" fill="currentColor" className="size-4" aria-hidden="true">
-              <path d="M4 4h16v16H4V4Zm4 2v2h2V6H8Zm3 0v2h2V6h-2Zm3 0v2h2V6h-2ZM8 10v2h8v-2H8Zm0 4v2h8v-2H8Z" />
+            <svg viewBox="0 0 24 24" fill="currentColor" className={`size-4 ${isSubmitting ? 'animate-spin' : ''}`} aria-hidden="true">
+              {isSubmitting ? (
+                 <path d="M12 21a9 9 0 1 1 6.18-2.55L16.77 17a7 7 0 1 0-4.77 2z" />
+              ) : (
+                <path d="M4 4h16v16H4V4Zm4 2v2h2V6H8Zm3 0v2h2V6h-2Zm3 0v2h2V6h-2ZM8 10v2h8v-2H8Zm0 4v2h8v-2H8Z" />
+              )}
             </svg>
-            Calculate Tax & Save
+            {isSubmitting ? 'Calculating...' : 'Calculate Tax & Save'}
           </span>
         </button>
         <button
           type="button"
           onClick={onClose}
-          className="w-full py-2 text-[11px] font-black uppercase tracking-widest text-[#A3A8B3] hover:text-[#4E5564] transition-colors hover:cursor-pointer"
+          disabled={isSubmitting}
+          className="w-full py-2 text-[11px] font-black uppercase tracking-widest text-[#A3A8B3] hover:text-[#4E5564] transition-colors hover:cursor-pointer disabled:opacity-50"
         >
           Cancel
         </button>
